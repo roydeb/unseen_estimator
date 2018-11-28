@@ -1,6 +1,6 @@
 class Sampler():
     '''
-     generates samples from multiple distributions
+     picks samples from provided distributions
     '''
     XSamples = []
     YSamples = []
@@ -8,16 +8,16 @@ class Sampler():
         pass
 
     #write a function to pick samples from the provided distributions  
-    def generateXSamples():
+    def selectXSamples():
         samples = []
         #implement
 
         XSamples = samples
         return self.XSamples
 
-    def generateYSamples():
+    def selectYSamples():
         samples = []
         #implement
-        
+
         YSamples = samples
         return self.YSamples
