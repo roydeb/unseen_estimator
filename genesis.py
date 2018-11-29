@@ -1,6 +1,7 @@
 from generator import DistributionGenerator
 from sampler import Sampler
-from config import *
+import config
+import utils
 
 def multiGT():
     '''
@@ -87,15 +88,22 @@ def generateUniqueSamples(distribution):
 
 if __name__ == "__main__":
     # call the distribution generator to generate populations for various distributions
-    # distGenerator = DistributionGenerator()
-    # sigmas = distGenerator.generateDistributions()
+    #distGenerator = DistributionGenerator()
+    #sigmas = distGenerator.generateDistributions('uniform', config.MaxDistributionSize)
+    
+    #generate 'num_pops' populations of the 'dist' distribution
+    populations = utils.generate_populations(config.num_pops, config.dist)
+    # dists = []
+    # samplesX.append(distGenerator.generateDistributions('geometric', 100))
+    # samplesX.append(distGenerator.generateDistributions('dirichlet', 100))
+    #print(sigmas)
 
     # call the sampler for sampling from the above generated distributions
-    # sampler = Sampler()
-    # samplesX = sampler.generateXSamples()
+    sampler = Sampler()
+    samplesX = sampler.generateSamples(populations,config.num_samples, config.max_sample_size)
     # samplesX = sigmas
     # samplesX = [[1,1,2,3,3,3,3,4], [1,2,3,4], [1,3,4,4,4,5]]
-    samplesX = [[1,2,3,5,6], [1,2,4,5,5,6,6]]
+    #samplesX = [[1,2,3,5,6], [1,2,4,5,5,6,6]]
     freqList = []
     maxKeys = []
     uniqueSamples = []
@@ -108,6 +116,7 @@ if __name__ == "__main__":
     # for the samples generated above, create the multi population fingerprint
     fingerprint = generateFingerprint(freqList, maxKeys, uniqueSamples)
     for i in fingerprint:
+        #if fingerprint[i] != 0:
         print i, fingerprint[i]
     # implement Good toulmin on the above generated X samples
     # UCap = MultiGT(fingerprint)
