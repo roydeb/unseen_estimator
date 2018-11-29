@@ -3,11 +3,33 @@ from sampler import Sampler
 import config
 import utils
 
-def multiGT():
+def multiGT(fingerprint, freqList, expol):
     '''
      good toulmin estimator for multi population distriubtions
-     returns estimate
+     returns estimated unseen count
     '''
+    freqCounts = []
+    for freqs in freqList:
+        dist = {}
+        for f in freqs.keys():
+            dist[f] = len(freqs[f])
+        freqCounts.append(dist)
+    # import pdb; pdb.set_trace()
+    #expol [t1,t2,t3]
+    #k (k1,k2,k3)
+    # print fingerprint
+    uCap = 0
+    for k in fingerprint:
+        term1 = 1
+        for idx,ek in enumerate(k):
+            freqDict = freqCounts[idx]
+            if ek in freqDict:
+                term1 *= ((-1 * expol[idx])**freqDict[ek])
+        term2 = fingerprint[k]
+        # print term1,term2
+        uCap += term1*term2
+    uCap = -1 * uCap
+    return uCap
 
 def generateFingerprint(freqList, lists, samples):
     indices = generateIndicies(lists)
@@ -102,8 +124,8 @@ if __name__ == "__main__":
     sampler = Sampler()
     samplesX = sampler.generateSamples(populations,config.num_samples, config.max_sample_size)
     # samplesX = sigmas
-    # samplesX = [[1,1,2,3,3,3,3,4], [1,2,3,4], [1,3,4,4,4,5]]
-    #samplesX = [[1,2,3,5,6], [1,2,4,5,5,6,6]]
+    # samplesX = [[1,1,2,3,3,3,3,4], [1,2,3,4,5], [1,3,4,4,4,5]]
+    # samplesX = [[1,2,3,5,6], [1,2,4,5,5,6,6]]
     freqList = []
     maxKeys = []
     uniqueSamples = []
@@ -112,14 +134,17 @@ if __name__ == "__main__":
         maxKey, distFreq = generateDistributionMappings(eachDist)
         freqList.append(distFreq)
         maxKeys.append([i for i in range(0, maxKey+1)])
-    # print maxKeys
+    # print freqList
     # for the samples generated above, create the multi population fingerprint
     fingerprint = generateFingerprint(freqList, maxKeys, uniqueSamples)
-    for i in fingerprint:
-        #if fingerprint[i] != 0:
-        print i, fingerprint[i]
+    # for i in fingerprint:
+    #     print i, fingerprint[i]
+
+    #extrapolation factor for each distribution
+    expol = [T]*len(samplesX)
     # implement Good toulmin on the above generated X samples
-    # UCap = MultiGT(fingerprint)
+    uCap = multiGT(fingerprint, freqList, expol)
+    print uCap
     # generate Y samples used to compare with the output of good toulmin
     # samplesY = sampler.generateYsamples()
 
@@ -130,4 +155,3 @@ if __name__ == "__main__":
 
     #generate some graphs
 
-    print "main file"

@@ -2,7 +2,7 @@
 
 #extrapolation factor/s
 #there can be different extrapolation factors for different distributions, can modify this to handle multiple
-T = 1
+T = 2
 
 #max size of distribution
 MaxDistributionSize = 1000
