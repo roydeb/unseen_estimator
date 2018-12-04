@@ -115,6 +115,7 @@ if __name__ == "__main__":
     
     #generate 'num_pops' populations of the 'dist' distribution
     populations = utils.generate_populations(config.num_pops, config.dist)
+    print(populations)
     # dists = []
     # samplesX.append(distGenerator.generateDistributions('geometric', 100))
     # samplesX.append(distGenerator.generateDistributions('dirichlet', 100))
@@ -123,6 +124,7 @@ if __name__ == "__main__":
     # call the sampler for sampling from the above generated distributions
     sampler = Sampler()
     samplesX = sampler.generateSamples(populations,config.num_samples, config.max_sample_size)
+    print(samplesX)
     # samplesX = sigmas
     # samplesX = [[1,1,2,3,3,3,3,4], [1,2,3,4,5], [1,3,4,4,4,5]]
     # samplesX = [[1,2,3,5,6], [1,2,4,5,5,6,6]]

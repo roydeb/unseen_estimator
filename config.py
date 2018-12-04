@@ -29,5 +29,5 @@ dist = 'uniform'
 num_pops = 2
 
 # number of samples
-num_samples = 15
+num_samples = 10
 
