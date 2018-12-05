@@ -1,6 +1,7 @@
 import random
 from generator import DistributionGenerator
 import config
+import math as mt
 
 def generate_populations(num_pops):
     """
@@ -22,6 +23,14 @@ def generate_alphas(num_pops):
         list_of_lists.append(alphas_list)
     return list_of_lists
 
+def binomial(p, n, i):
+    log = mt.log
+    exp = mt.exp
+    output = n*log(1-p)
+    for i in range(0,i):
+        output += log(n-i) + log(p/(1-p)) - log(i+1)
+    return exp(output)
 
-if __name__ == "__main__":
-    print(generate_alphas(5))
+
+# if __name__ == "__main__":
+#     print(generate_alphas(5))
