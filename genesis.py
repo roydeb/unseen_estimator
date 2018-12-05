@@ -114,7 +114,7 @@ if __name__ == "__main__":
     #sigmas = distGenerator.generateDistributions('uniform', config.MaxDistributionSize)
     
     #generate 'num_pops' populations of the 'dist' distribution
-    populations = utils.generate_populations(config.num_pops, config.dist)
+    populations = utils.generate_populations(config.num_pops)
     print(populations)
     # dists = []
     # samplesX.append(distGenerator.generateDistributions('geometric', 100))
@@ -143,10 +143,10 @@ if __name__ == "__main__":
     #     print i, fingerprint[i]
 
     #extrapolation factor for each distribution
-    expol = [T]*len(samplesX)
+    expol = [config.T]*len(samplesX)
     # implement Good toulmin on the above generated X samples
     uCap = multiGT(fingerprint, freqList, expol)
-    print uCap
+    print(uCap)
     # generate Y samples used to compare with the output of good toulmin
     # samplesY = sampler.generateYsamples()
 

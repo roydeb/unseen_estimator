@@ -1,7 +1,8 @@
 #tuning various hyperparameters for testing
 
 #extrapolation factor/s
-#there can be different extrapolation factors for different distributions, can modify this to handle multiple
+#there can be different extrapolation factors for different 
+# populations, can modify this to handle multiple
 T = 2
 
 #max size of distribution
@@ -23,7 +24,7 @@ prob_success = 0.1
 max_sample_size = 50
 
 # distribution to generate populations from
-dist = 'uniform'
+#dist = 'uniform'
 
 #number of populations
 num_pops = 2
@@ -31,3 +32,5 @@ num_pops = 2
 # number of samples
 num_samples = 10
 
+#distribution types
+dist_types = ["uniform", "dirichlet", "geometric"]
