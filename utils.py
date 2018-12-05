@@ -2,6 +2,7 @@ import random
 from generator import DistributionGenerator
 import config
 import math as mt
+import pandas as pd
 
 def generate_populations(num_pops):
     """
@@ -22,6 +23,14 @@ def generate_alphas(num_pops):
             alphas_list.append(random.random())
         list_of_lists.append(alphas_list)
     return list_of_lists
+
+def generate_prob_distributions(pops):
+    pop_dists = []
+    for pop in pops:
+        s = pd.Series(pop)
+        pop_dists.append(list((s.groupby(s).transform('count') / len(s)).values))
+    return pop_dists
+
 
 def binomial(p, n, i):
     log = mt.log
