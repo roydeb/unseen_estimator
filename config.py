@@ -3,7 +3,7 @@
 #extrapolation factor/s
 #there can be different extrapolation factors for different 
 # populations, can modify this to handle multiple
-T = 2
+T = 1
 
 #max size of distribution
 MaxDistributionSize = 1000
@@ -27,10 +27,11 @@ max_sample_size = 50
 #dist = 'uniform'
 
 #number of populations
-num_pops = 2
+num_pops = 7
 
 # number of samples
-num_samples = 10
+num_samples = 7
 
 #distribution types
 dist_types = ["uniform", "dirichlet", "geometric"]
+# dist_types = ["uniform"]

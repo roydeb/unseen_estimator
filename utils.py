@@ -58,6 +58,12 @@ def binomial(p, n, i):
         output += log(n-i) + log(p/(1-p)) - log(i+1)
     return exp(output)
 
+def poissonCoefficient(lmd, n):
+    log = mt.log
+    exp = mt.exp
+    output = sum((log(lmd) - log(i+1)) for i in range(0,n))
+    return exp(output -lmd)
+
 
 # if __name__ == "__main__":
 #     print(generate_alphas(5))

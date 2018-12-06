@@ -67,12 +67,14 @@ def multiGT(fingerprint, freqList, expol):
             freqDict = freqCounts[idx]
             if ek in freqDict:
                 term1 *= ((-1 * expol[idx])**freqDict[ek])
+                if expol[idx] > 1:
+                    term1 *= utils.poissonCoefficient(0.6,freqDict[ek])
         term2 = fingerprint[k]
         # print term1,term2
         uCap += term1*term2
         # print uCap
     uCap = -1 * uCap
-    return uCap
+    return int(uCap)
 
 def generateFingerprint(freqList, lists, samples):
     indices = generateIndicies(lists)
