@@ -3,6 +3,16 @@ from sampler import Sampler
 import config as config
 import utils as utils
 
+# def hll(freqDist, alpha, hAlpha, samples, maxCount):
+#     for h in range(len(hAlpha)):
+#         alphai = alpha[h]
+#         hAlphai = hAlpha[h]
+#         for i in range(1, maxCount+1):
+#             p = phiI(i, freqDist)
+#             if  p >= 2:
+
+
+
 def PhiCapHist(alpha, hAlpha, samples, freqDist, count):
     phiCap = 0
     for i in range(len(alpha)):
@@ -60,6 +70,7 @@ def multiGT(fingerprint, freqList, expol):
         term2 = fingerprint[k]
         # print term1,term2
         uCap += term1*term2
+        # print uCap
     uCap = -1 * uCap
     return uCap
 
@@ -148,9 +159,11 @@ def generateUniqueSamples(distribution):
 
 def generateTrueUnseen(samplesX, samplesY):
     count = 0 
+    samplesX = set().union(*samplesX)
     for eachSample in samplesY:
-        if eachSample not in samplesX:
-            count+=1
+        for eachS in eachSample:
+            if eachS not in samplesX:
+                count+=1
     return count
 
 if __name__ == "__main__":
@@ -188,7 +201,9 @@ if __name__ == "__main__":
     propDist = utils.generateProbDistributions(samplesX)
     hAlpha = utils.generateHAlphas(alpha, propDist)
     # import pdb;pdb.set_trace()
+    
     histIndex = hCounts(freqList, alpha, hAlpha, samplesX, maxCount)
+    # histIndexl = hll()
     print "hCounts: ", hAlpha[histIndex]
 
     trueUnseen = generateTrueUnseen(samplesX, samplesY)
