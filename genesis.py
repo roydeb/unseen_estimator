@@ -1,7 +1,43 @@
 from generator import DistributionGenerator
 from sampler import Sampler
-import config
-import utils
+import config as config
+import utils as utils
+
+def PhiCapHist(alpha, hAlpha, samples, freqDist, count):
+    phiCap = 0
+    for i in range(len(alpha)):
+        h = hAlpha[i]
+        b = 1
+        for j in range(config.num_samples):
+            if count in freqDist[j]:
+                b *= utils.binomial(alpha[j], len(samples[j]), len(freqDist[j][count]))
+            else:
+                b *= utils.binomial(alpha[j], len(samples[j]), 0)
+        phiCap += h * b
+    return phiCap
+
+def phiI(i, freqDist):
+    phi = 0
+    for dist in freqDist:
+        if i in dist:
+            phi += len(dist[i])
+    return phi
+
+def hCounts(freqDist, alpha, hAlpha, samples, maxCount):
+    hCountsList = []
+    for h in range(len(hAlpha)):
+        alphai = alpha[h]
+        hAlphai = hAlpha[h]
+        s = 0
+        for i in range(1, maxCount+1):
+            p = phiI(i, freqDist)
+            if  p >= 2:
+                numer = abs(p - PhiCapHist(alphai, hAlphai, samples, freqDist, i))
+                denom = (1 + p)**0.5
+                s += float(numer)/float(denom)
+        hCountsList.append(s)
+    return hCountsList.index(min(hCountsList))
+
 
 def multiGT(fingerprint, freqList, expol):
     '''
@@ -14,10 +50,6 @@ def multiGT(fingerprint, freqList, expol):
         for f in freqs.keys():
             dist[f] = len(freqs[f])
         freqCounts.append(dist)
-    # import pdb; pdb.set_trace()
-    #expol [t1,t2,t3]
-    #k (k1,k2,k3)
-    # print fingerprint
     uCap = 0
     for k in fingerprint:
         term1 = 1
@@ -101,6 +133,12 @@ def generateDistributionMappings(distribution):
             frequencyCounts[countFreqs[eachSpecies]] = l
     return max(frequencyCounts, key=int), frequencyCounts
 
+def generateMaxCountFromDists(freqList):
+    maxList = []
+    for dist in freqList:
+        maxList.append(max(dist, key=int))
+    return max(maxList)
+
 def generateUniqueSamples(distribution):
     unique_set = []
     for val in distribution:
@@ -108,25 +146,24 @@ def generateUniqueSamples(distribution):
             unique_set.append(val)
     return unique_set
 
+def generateTrueUnseen(samplesX, samplesY):
+    count = 0 
+    for eachSample in samplesY:
+        if eachSample not in samplesX:
+            count+=1
+    return count
+
 if __name__ == "__main__":
-    # call the distribution generator to generate populations for various distributions
-    #distGenerator = DistributionGenerator()
-    #sigmas = distGenerator.generateDistributions('uniform', config.MaxDistributionSize)
     
     #generate 'num_pops' populations of the 'dist' distribution
-    populations = utils.generate_populations(config.num_pops)
-    print(populations)
-    # dists = []
-    # samplesX.append(distGenerator.generateDistributions('geometric', 100))
-    # samplesX.append(distGenerator.generateDistributions('dirichlet', 100))
-    #print(sigmas)
+    populations = utils.generatePopulations(config.num_pops)
 
     # call the sampler for sampling from the above generated distributions
     sampler = Sampler()
     samplesX = sampler.generateSamples(populations,config.num_samples, config.max_sample_size)
-    print(samplesX)
-    # samplesX = sigmas
-    # samplesX = [[1,1,2,3,3,3,3,4], [1,2,3,4,5], [1,3,4,4,4,5]]
+
+    samplesY = sampler.generateSamples(populations,config.num_samples, config.max_sample_size)
+
     # samplesX = [[1,2,3,5,6], [1,2,4,5,5,6,6]]
     freqList = []
     maxKeys = []
@@ -136,8 +173,6 @@ if __name__ == "__main__":
         maxKey, distFreq = generateDistributionMappings(eachDist)
         freqList.append(distFreq)
         maxKeys.append([i for i in range(0, maxKey+1)])
-    # print freqList
-    # for the samples generated above, create the multi population fingerprint
     fingerprint = generateFingerprint(freqList, maxKeys, uniqueSamples)
     # for i in fingerprint:
     #     print i, fingerprint[i]
@@ -145,8 +180,20 @@ if __name__ == "__main__":
     #extrapolation factor for each distribution
     expol = [config.T]*len(samplesX)
     # implement Good toulmin on the above generated X samples
-    uCap = multiGT(fingerprint, freqList, expol)
-    print(uCap)
+    uCap = abs(multiGT(fingerprint, freqList, expol))
+    print "uCap:", uCap
+    alpha = utils.generateAlphas(config.num_samples)
+    # import pdb;pdb.set_trace()
+    maxCount = generateMaxCountFromDists(freqList)
+    propDist = utils.generateProbDistributions(samplesX)
+    hAlpha = utils.generateHAlphas(alpha, propDist)
+    # import pdb;pdb.set_trace()
+    histIndex = hCounts(freqList, alpha, hAlpha, samplesX, maxCount)
+    print "hCounts: ", hAlpha[histIndex]
+
+    trueUnseen = generateTrueUnseen(samplesX, samplesY)
+    print "trueUnseen: ", trueUnseen
+
     # generate Y samples used to compare with the output of good toulmin
     # samplesY = sampler.generateYsamples()
 
@@ -156,4 +203,3 @@ if __name__ == "__main__":
     # did not write any skeleton for this part of the code
 
     #generate some graphs
-
