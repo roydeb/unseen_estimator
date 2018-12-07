@@ -3,7 +3,7 @@ from generator import DistributionGenerator
 import config
 import math as mt
 import pandas as pd
-
+import scipy.stats as scstat
 def generatePopulations(num_pops):
     """
     Generate num_pops populations of the type dist_type.
@@ -16,25 +16,24 @@ def generatePopulations(num_pops):
     return populations
 
 def generateAlphas(num_pops):
-    list_of_lists = []
-    for i in range(num_pops):
-        alphas_list = []
-        for j in range(num_pops):
-            alphas_list.append(round(random.random(),1))
-        list_of_lists.append(alphas_list)
-    return list_of_lists
+    # list_of_lists = []
+    alphas_list = []
+    for j in range(num_pops):
+        alphas_list.append(round(random.random(),1))
+    # list_of_lists.append(alphas_list)
+    return alphas_list
 
 def generateHAlphas(alphas, prop_dists):
-    hAlpha = []
-    for j in range(len(alphas)):
-        ha = []
-        for i in range(len(alphas[j])):
-            if alphas[j][i] in prop_dists[j]:
-                ha.append(prop_dists[j].count(alphas[j][i]))
-            else:
-                ha.append(0)
-        hAlpha.append(ha)
-    return hAlpha
+    # hAlpha = []
+    # for j in range(len(alphas)):
+    ha = []
+    for i in range(len(alphas)):
+        if alphas[i] in prop_dists[i]:
+            ha.append(prop_dists[i].count(alphas[i]))
+        else:
+            ha.append(0)
+    # hAlpha.append(ha)
+    return ha
 
 
 def generateProbDistributions(pops):
@@ -45,8 +44,19 @@ def generateProbDistributions(pops):
         pop_dists.append([round(float(i),1) for i in pop_dists2])
     return pop_dists
 
+def poisson(lamba,n):
+    # return (mt.exp(lamba) * (lamba**n)) / mt.factorial(n)
+    p = mt.exp(-lamba)
+    for i in xrange(n):
+        p *= lamba
+        p /= i+1
+    if p == 0:
+        p += 1e-6
+    return p
 
 def binomial(p, n, i):
+    # print p
+    p = round(p, 2)
     if p == 1.0:
         p -= 1e-8
     if p == 0.0:

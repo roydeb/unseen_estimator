@@ -2,16 +2,45 @@ from generator import DistributionGenerator
 from sampler import Sampler
 import config as config
 import utils as utils
+from scipy import optimize
+from tabulate import tabulate
+import math
+import copy as copy
 
-# def hll(freqDist, alpha, hAlpha, samples, maxCount):
-#     for h in range(len(hAlpha)):
-#         alphai = alpha[h]
-#         hAlphai = hAlpha[h]
-#         for i in range(1, maxCount+1):
-#             p = phiI(i, freqDist)
-#             if  p >= 2:
+# import scipy as sc
+def hllf(alpha, hAlpha, freqDist, samples, maxCount, propDist):
+    hAlpha = utils.generateHAlphas(alpha, propDist)
+    # print hAlpha
+    s = 0
+    for i in range(1, maxCount+1):
+        p = phiI(i, freqDist)
+        if  p >= 2:
+            s += math.log(utils.poisson(PhiCapHist(alpha, hAlpha, samples, freqDist, i), p))
+    # hCountsList.append(s)
+    # return hCountsList.index(min(hCountsList))
+    return -1*s
 
 
+def generateHemp(maxFreqCount, freqDist):
+    hEmp = []
+    for i in range(maxFreqCount+1):
+        if phiI(i, freqDist) == 1:
+            hEmp.append(1)
+        else:
+            hEmp.append(0)
+    return hEmp
+
+def expectedNumObserved(hAlpha, alpha, samplesX):
+    s = 0
+    for i in range(len(hAlpha)):
+        m =1
+        l = len(samplesX[i])
+        for j in range(len(samplesX)):
+            # print i, alpha[j]
+            m *= (1-alpha[j])**l
+        print m
+        s += hAlpha[i]*(1-m)
+    return s
 
 def PhiCapHist(alpha, hAlpha, samples, freqDist, count):
     phiCap = 0
@@ -33,20 +62,21 @@ def phiI(i, freqDist):
             phi += len(dist[i])
     return phi
 
-def hCounts(freqDist, alpha, hAlpha, samples, maxCount):
-    hCountsList = []
-    for h in range(len(hAlpha)):
-        alphai = alpha[h]
-        hAlphai = hAlpha[h]
-        s = 0
-        for i in range(1, maxCount+1):
-            p = phiI(i, freqDist)
-            if  p >= 2:
-                numer = abs(p - PhiCapHist(alphai, hAlphai, samples, freqDist, i))
-                denom = (1 + p)**0.5
-                s += float(numer)/float(denom)
-        hCountsList.append(s)
-    return hCountsList.index(min(hCountsList))
+def hCounts(alpha, hAlpha, freqDist, samples, maxCount, propDist):
+    # hCountsList = []
+    # for h in range(len(hAlpha)):
+    hAlpha = utils.generateHAlphas(alpha, propDist)
+    # print hAlpha
+    s = 0
+    for i in range(1, maxCount+1):
+        p = phiI(i, freqDist)
+        if  p >= 2:
+            numer = abs(p - PhiCapHist(alpha, hAlpha, samples, freqDist, i))
+            denom = (1 + p)**0.5
+            s += float(numer)/float(denom)
+    # hCountsList.append(s)
+    # return hCountsList.index(min(hCountsList))
+    return s
 
 
 def multiGT(fingerprint, freqList, expol):
@@ -180,6 +210,7 @@ if __name__ == "__main__":
     samplesY = sampler.generateSamples(populations,config.num_samples, config.max_sample_size)
 
     # samplesX = [[1,2,3,5,6], [1,2,4,5,5,6,6]]
+    # pp = pprint.PrettyPrinter(indent=4)
     freqList = []
     maxKeys = []
     uniqueSamples = []
@@ -189,34 +220,57 @@ if __name__ == "__main__":
         freqList.append(distFreq)
         maxKeys.append([i for i in range(0, maxKey+1)])
     fingerprint = generateFingerprint(freqList, maxKeys, uniqueSamples)
-    # for i in fingerprint:
-    #     print i, fingerprint[i]
 
     #extrapolation factor for each distribution
     expol = [config.T]*len(samplesX)
     # implement Good toulmin on the above generated X samples
     uCap = abs(multiGT(fingerprint, freqList, expol))
-    print "uCap:", uCap
+    # print("Weighted Linear Estimator (uCap):"+str(uCap))
     alpha = utils.generateAlphas(config.num_samples)
+    alpha2 = copy.deepcopy(alpha)
     # import pdb;pdb.set_trace()
     maxCount = generateMaxCountFromDists(freqList)
     propDist = utils.generateProbDistributions(samplesX)
     hAlpha = utils.generateHAlphas(alpha, propDist)
+    hAlpha2 = copy.deepcopy(hAlpha)
     # import pdb;pdb.set_trace()
-    
-    histIndex = hCounts(freqList, alpha, hAlpha, samplesX, maxCount)
-    # histIndexl = hll()
-    print "hCounts: ", hAlpha[histIndex]
-
+    hemp = generateHemp(maxCount, freqList)
+    hemp2 = copy.deepcopy(hemp)
+    # histIndex = hCounts(alpha, hAlpha, freqList, samplesX, maxCount, propDist)
+    # histIndexlL = hll(alpha, hAlpha, freqList, samplesX, maxCount, propDist)
+    # print histIndexlL
+    bnds = ((0,1.0),)*len(alpha)
+    result = optimize.minimize(hCounts, alpha, args=(hAlpha, freqList, samplesX, maxCount, propDist), bounds=bnds)
+    # print "alpha", result
+    # resultll = optimize.minimize(hllf, alpha2, args=(hAlpha2, freqList, samplesX, maxCount, propDist), bounds=bnds)
+    e = expectedNumObserved(hAlpha, list(result.x), samplesX)
+    # print "alpha2", resultll.x
     trueUnseen = generateTrueUnseen(samplesX, samplesY)
-    print "trueUnseen: ", trueUnseen
-
-    # generate Y samples used to compare with the output of good toulmin
-    # samplesY = sampler.generateYsamples()
-
-    #compare and provide some sort of statistic to compare sampleY and MultiGT output
-
-    #generate the joint frequency distribution histogram based on the algorithm given in the paper
-    # did not write any skeleton for this part of the code
-
-    #generate some graphs
+    # print "trueUnseen: ", trueUnseen
+    he = len(hemp)
+    halpha = list(hAlpha)
+    hal = len(halpha)
+    if he > hal:
+        for i in range(hal, he, 1):
+            halpha.append(0)
+    else:
+        for i in range(he, hal, 1):
+            hemp.append(0)
+    # he2 = len(hemp2)
+    # halpha2 = list(hAlpha2)
+    # hal2 = len(halpha2)
+    # if he2 > hal2:
+    #     for i in range(hal2, he2, 1):
+    #         halpha2.append(0)
+    # else:
+    #     for i in range(he2, hal2, 1):
+    #         hemp2.append(0)
+    # print halpha2, hemp2
+    hcount = [x + y for x, y in zip(hemp, halpha)]
+    # print hemp2
+    # hll = [x + y for x, y in zip(hemp2, halpha2)]
+    print 
+    # ["Histogram hll: ", hll]
+    print tabulate([["Minimized alpha", list(result.x)],["Histogram hCounts: ", hcount], ["trueUnseen: ", trueUnseen], ["Expected Number", e], ["Weighted Linear Estimator (uCap):", str(uCap)]], headers=['Parameter', 'Value'], tablefmt='orgtbl')
+    
+    print 
