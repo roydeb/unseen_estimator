@@ -18,8 +18,12 @@ Estimated Number of species Observed: E[num observed] =∑(over α) H(α)*(1−�
 Sample Output:
 
 Minimized alpha                   : [0.7, 0.5, 0.4, 0.6, 0.7, 0.0, 0.5]
+
 Histogram hCounts:                : [0, 0, 0, 1, 0, 20, 0] 
+
 trueUnseen:                       : 18              
+
 Expected Number                   : 20.0
+
 Weighted Linear Estimator (uCap): : 25
 
