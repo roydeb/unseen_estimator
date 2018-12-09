@@ -11,8 +11,11 @@ To run:
 
 
 Weighted Linear Estimator:  U = −∑(i1,...,im) : ∑ij>0(m∏j=1(−tj)ij)φi1,...,imW(i1,...,im).
+
 Generate Histogram implementation: Refer -> https://arxiv.org/pdf/1707.03854.pdf
+
 Estimated Number of species Observed: E[num observed] =∑(over α) H(α)*(1−∏(i 1..m)P) where P = (1−αi)^ni
+
 
 Sample Output:
 
