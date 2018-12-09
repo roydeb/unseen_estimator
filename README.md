@@ -1,9 +1,8 @@
-CSE 549 Computational Biology Project
-
 Estimation of Unseen Species
 
+CSE 549 Computational Biology Project
+
 implementation of algorithm described in the paper, https://arxiv.org/pdf/1707.03854.pdf
-link to google drive folder: https://drive.google.com/open?id=1puYc7cyozPZQYmTLrJXmrPU5cpCmfFNx
 
 To run:
 1. Install the dependencies by running 'pip install -r requirements.txt'
